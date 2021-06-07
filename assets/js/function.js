@@ -33,7 +33,7 @@ function changeBrightness( factor, sprite ) {
 }
 
 function displayVictoryMess( moves ) {
-  document.getElementById( "moves" ).innerHTML = "You Moved " + moves + " Steps.";
+  document.getElementById( "moves" ).innerHTML = "총 " + moves + "번 움직였습니다.";
   toggleVisablity( "Message-Container" );
 }
 
@@ -49,7 +49,7 @@ function Maze( Width, Height ) {
   var mazeMap;
   var width = Width;
   var height = Height;
-  var startCoord, endCoord;
+  var startCoord, endCoord,keyCoord1,keyCoord2;
   var dirs = [ "n", "s", "e", "w" ];
   var modDir = {
     n: {
@@ -82,6 +82,12 @@ function Maze( Width, Height ) {
   };
   this.endCoord = function () {
     return endCoord;
+  };
+  this.keyCoord1 = function (){
+    return keyCoord1;
+  };
+  this.keyCoord2 = function (){
+    return keyCoord2;
   };
 
   function genMap() {
@@ -171,6 +177,14 @@ function Maze( Width, Height ) {
           x: height - 1,
           y: width - 1
         };
+        keyCoord1={
+          x:0,
+          y:width-1
+        };
+        keyCoord2={
+          x:height-1,
+          y:0
+        };
         break;
       case 1:
         startCoord = {
@@ -180,6 +194,14 @@ function Maze( Width, Height ) {
         endCoord = {
           x: height - 1,
           y: 0
+        };
+        keyCoord1={
+          x:0,
+          y:width-1
+        };
+        keyCoord2={
+          x:height-1,
+          y:0
         };
         break;
       case 2:
@@ -191,6 +213,14 @@ function Maze( Width, Height ) {
           x: 0,
           y: width - 1
         };
+        keyCoord1={
+          x:0,
+          y:0
+        };
+        keyCoord2={
+          x:height-1,
+          y:width-1
+        };
         break;
       case 3:
         startCoord = {
@@ -201,6 +231,14 @@ function Maze( Width, Height ) {
           x: 0,
           y: 0
         };
+        keyCoord1={
+          x:height-1,
+          y:0
+        };
+        keyCoord2={
+          x:0,
+          y:width-1
+        };
         break;
     }
   }
@@ -210,10 +248,12 @@ function Maze( Width, Height ) {
   defineMaze();
 }
 
-function DrawMaze( Maze, ctx, cellsize, endSprite = null ) {
+function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySprite2=null*/ ) {
   var map = Maze.map();
   var cellSize = cellsize;
   var drawEndMethod;
+  var drawKeyMethod1;
+  var drawkeyMethod2;
   ctx.lineWidth = cellSize / 40;
 
   this.redrawMaze = function ( size ) {
@@ -221,6 +261,8 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null ) {
     ctx.lineWidth = cellSize / 50;
     drawMap();
     drawEndMethod();
+    drawKeyMethod1();
+    drawkeyMethod2();
   };
 
   function drawCell( xCord, yCord, cell ) {
@@ -305,6 +347,94 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null ) {
       cellSize - offsetRight
     );
   }
+  function drawKeyFlag1() {
+    var coord = Maze.keyCoord1();
+    var gridSize = 4;
+    var fraction = cellSize / gridSize - 2;
+    var colorSwap = true;
+    for ( let y = 0; y < gridSize; y++ ) {
+      if ( gridSize % 2 == 0 ) {
+        colorSwap = !colorSwap;
+      }
+      for ( let x = 0; x < gridSize; x++ ) {
+        ctx.beginPath();
+        ctx.rect(
+          coord.x * cellSize + x * fraction + 4.5,
+          coord.y * cellSize + y * fraction + 4.5,
+          fraction,
+          fraction
+        );
+        if ( colorSwap ) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        } else {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        }
+        ctx.fill();
+        colorSwap = !colorSwap;
+      }
+    }
+  }
+
+  function drawKeySprite1() {
+    var offsetLeft = cellSize / 50;
+    var offsetRight = cellSize / 25;
+    var coord = Maze.keyCoord1();
+    ctx.drawImage(
+      endSprite,
+      2,
+      2,
+      endSprite.width,
+      endSprite.height,
+      coord.x * cellSize + offsetLeft,
+      coord.y * cellSize + offsetLeft,
+      cellSize - offsetRight,
+      cellSize - offsetRight
+    );
+  }
+  function drawKeyFlag2() {
+    var coord = Maze.keyCoord2();
+    var gridSize = 4;
+    var fraction = cellSize / gridSize - 2;
+    var colorSwap = true;
+    for ( let y = 0; y < gridSize; y++ ) {
+      if ( gridSize % 2 == 0 ) {
+        colorSwap = !colorSwap;
+      }
+      for ( let x = 0; x < gridSize; x++ ) {
+        ctx.beginPath();
+        ctx.rect(
+          coord.x * cellSize + x * fraction + 4.5,
+          coord.y * cellSize + y * fraction + 4.5,
+          fraction,
+          fraction
+        );
+        if ( colorSwap ) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        } else {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        }
+        ctx.fill();
+        colorSwap = !colorSwap;
+      }
+    }
+  }
+
+  function drawKeySprite2() {
+    var offsetLeft = cellSize / 50;
+    var offsetRight = cellSize / 25;
+    var coord = Maze.keyCoord2();
+    ctx.drawImage(
+      endSprite,
+      2,
+      2,
+      endSprite.width,
+      endSprite.height,
+      coord.x * cellSize + offsetLeft,
+      coord.y * cellSize + offsetLeft,
+      cellSize - offsetRight,
+      cellSize - offsetRight
+    );
+  }
 
   function clear() {
     var canvasSize = cellSize * map.length;
@@ -313,12 +443,18 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null ) {
 
   if ( endSprite != null ) {
     drawEndMethod = drawEndSprite;
+    drawkeyMethod1 = drawKeySprite1;
+    drawkeyMethod2 = drawKeySprite2;
   } else {
     drawEndMethod = drawEndFlag;
+    drawKeyMethod1 = drawKeyFlag1;
+    drawKeyMethod2 = drawKeyFlag2;
   }
   clear();
   drawMap();
   drawEndMethod();
+  //drawKeyMethod1();
+  //drawkeyMethod2();
 }
 
 function Player( maze, c, _cellsize, onComplete, sprite = null ) {
@@ -496,6 +632,8 @@ var mazeCanvas = document.getElementById( "mazeCanvas" );
 var ctx = mazeCanvas.getContext( "2d" );
 var sprite;
 var finishSprite;
+var keySprite1;
+var keySprite2;
 var maze, draw, player;
 var cellSize;
 var difficulty;
@@ -515,6 +653,8 @@ window.onload = function () {
   //Load and edit sprites
   var completeOne = false;
   var completeTwo = false;
+  var completeThree = false;
+  var completeFour = false;
   var isComplete = () => {
     if ( completeOne === true && completeTwo === true ) {
       console.log( "Runs" );
@@ -525,7 +665,7 @@ window.onload = function () {
   };
   sprite = new Image();
   sprite.src =
-    "https://image.ibb.co/dr1HZy/Pf_RWr3_X_Imgur.png" +
+    "https://img.icons8.com/flat-round/64/000000/bee--v1.png" +
     "?" +
     new Date().getTime();
   sprite.setAttribute( "crossOrigin", " " );
@@ -537,7 +677,7 @@ window.onload = function () {
   };
 
   finishSprite = new Image();
-  finishSprite.src = "https://image.ibb.co/b9wqnJ/i_Q7m_U25_Imgur.png" +
+  finishSprite.src = "https://img.icons8.com/fluent/48/000000/beehive.png" +
     "?" +
     new Date().getTime();
   finishSprite.setAttribute( "crossOrigin", " " );
@@ -545,6 +685,28 @@ window.onload = function () {
     finishSprite = changeBrightness( 1.1, finishSprite );
     completeTwo = true;
     console.log( completeTwo );
+    isComplete();
+  };
+  keySprite1 = new Image();
+  keySprite1.src = "https://img.icons8.com/ios/50/000000/flower--v2.png" +
+    "?" +
+    new Date().getTime();
+    keySprite1.setAttribute( "crossOrigin", " " );
+    keySprite1.onload = function () {
+    keySprite1 = changeBrightness( 1.1, keySprite1 );
+    completeThree = true;
+    console.log( completeThree );
+    isComplete();
+  };
+  keySprite2 = new Image();
+  keySprite2.src = "https://img.icons8.com/ios/50/000000/flower--v2.png" +
+    "?" +
+    new Date().getTime();
+    keySprite2.setAttribute( "crossOrigin", " " );
+    keySprite2.onload = function () {
+    keySprite2 = changeBrightness( 1.1, keySprite2 );
+    completeFour = true;
+    console.log( completeFour );
     isComplete();
   };
 
@@ -577,7 +739,7 @@ function makeMaze() {
   difficulty = e.options[ e.selectedIndex ].value;
   cellSize = mazeCanvas.width / difficulty;
   maze = new Maze( difficulty, difficulty );
-  draw = new DrawMaze( maze, ctx, cellSize, finishSprite );
+  draw = new DrawMaze( maze, ctx, cellSize, finishSprite/*,keySprite1,keySprite2 */);
   player = new Player( maze, mazeCanvas, cellSize, displayVictoryMess, sprite );
   if ( document.getElementById( "mazeContainer" ).style.opacity < "100" ) {
     document.getElementById( "mazeContainer" ).style.opacity = "100";
