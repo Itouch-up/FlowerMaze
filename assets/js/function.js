@@ -55,22 +55,22 @@ function Maze( Width, Height ) {
     n: {
       y: -1,
       x: 0,
-      o: "s"
+      o: "s"//south
     },
     s: {
       y: 1,
       x: 0,
-      o: "n"
+      o: "n"//north
     },
     e: {
       y: 0,
       x: 1,
-      o: "w"
+      o: "w"//west
     },
     w: {
       y: 0,
       x: -1,
-      o: "e"
+      o: "e"//east
     }
   };
 
@@ -196,11 +196,11 @@ function Maze( Width, Height ) {
           y: 0
         };
         keyCoord1={
-          x:0,
+          x:width-1,
           y:width-1
         };
         keyCoord2={
-          x:height-1,
+          x:0,
           y:0
         };
         break;
@@ -248,21 +248,22 @@ function Maze( Width, Height ) {
   defineMaze();
 }
 
-function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySprite2=null*/ ) {
+function DrawMaze( Maze, ctx, cellsize, endSprite = null,keySprite1=null,keySprite2=null ) {
   var map = Maze.map();
   var cellSize = cellsize;
   var drawEndMethod;
   var drawKeyMethod1;
-  var drawkeyMethod2;
+  var drawKeyMethod2;
   ctx.lineWidth = cellSize / 40;
 
   this.redrawMaze = function ( size ) {
     cellSize = size;
     ctx.lineWidth = cellSize / 50;
+    
     drawMap();
     drawEndMethod();
     drawKeyMethod1();
-    drawkeyMethod2();
+    drawKeyMethod2();
   };
 
   function drawCell( xCord, yCord, cell ) {
@@ -380,11 +381,11 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySp
     var offsetRight = cellSize / 25;
     var coord = Maze.keyCoord1();
     ctx.drawImage(
-      endSprite,
+      keySprite1,
       2,
       2,
-      endSprite.width,
-      endSprite.height,
+      keySprite1.width,
+      keySprite1.height,
       coord.x * cellSize + offsetLeft,
       coord.y * cellSize + offsetLeft,
       cellSize - offsetRight,
@@ -424,11 +425,11 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySp
     var offsetRight = cellSize / 25;
     var coord = Maze.keyCoord2();
     ctx.drawImage(
-      endSprite,
+      keySprite2,
       2,
       2,
-      endSprite.width,
-      endSprite.height,
+      keySprite2.width,
+      keySprite2.height,
       coord.x * cellSize + offsetLeft,
       coord.y * cellSize + offsetLeft,
       cellSize - offsetRight,
@@ -443,8 +444,8 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySp
 
   if ( endSprite != null ) {
     drawEndMethod = drawEndSprite;
-    drawkeyMethod1 = drawKeySprite1;
-    drawkeyMethod2 = drawKeySprite2;
+    drawKeyMethod1 = drawKeySprite1;
+    drawKeyMethod2 = drawKeySprite2;
   } else {
     drawEndMethod = drawEndFlag;
     drawKeyMethod1 = drawKeyFlag1;
@@ -453,11 +454,14 @@ function DrawMaze( Maze, ctx, cellsize, endSprite = null,/*keySprite1=null,keySp
   clear();
   drawMap();
   drawEndMethod();
-  //drawKeyMethod1();
-  //drawkeyMethod2();
+  drawKeyMethod1();
+  drawKeyMethod2();
+  key();
 }
 
 function Player( maze, c, _cellsize, onComplete, sprite = null ) {
+  var onkey1= new Boolean(false);
+  var onkey2= new Boolean(false);
   var ctx = c.getContext( "2d" );
   var drawSprite;
   var moves = 0;
@@ -490,6 +494,14 @@ function Player( maze, c, _cellsize, onComplete, sprite = null ) {
       2 * Math.PI
     );
     ctx.fill();
+    if ( coord.x === maze.keyCoord1().x && coord.y === maze.keyCoord1().y ) {
+      onKey1 = true;
+      player.unbindKeyDown();
+    }
+    if ( coord.x === maze.keyCoord2().x && coord.y === maze.keyCoord2().y ) {
+      onKey2 = true;
+      player.unbindKeyDown();
+    }
     if ( coord.x === maze.endCoord().x && coord.y === maze.endCoord().y ) {
       onComplete( moves );
       player.unbindKeyDown();
@@ -576,6 +588,7 @@ function Player( maze, c, _cellsize, onComplete, sprite = null ) {
         }
         break;
     }
+    key();
   }
 
   this.bindKeyDown = function () {
@@ -626,6 +639,7 @@ function Player( maze, c, _cellsize, onComplete, sprite = null ) {
   drawSprite( maze.startCoord() );
 
   this.bindKeyDown();
+
 }
 
 var mazeCanvas = document.getElementById( "mazeCanvas" );
@@ -688,7 +702,7 @@ window.onload = function () {
     isComplete();
   };
   keySprite1 = new Image();
-  keySprite1.src = "https://img.icons8.com/ios/50/000000/flower--v2.png" +
+  keySprite1.src = "https://img.icons8.com/officel/50/000000/flower.png" +
     "?" +
     new Date().getTime();
     keySprite1.setAttribute( "crossOrigin", " " );
@@ -699,7 +713,7 @@ window.onload = function () {
     isComplete();
   };
   keySprite2 = new Image();
-  keySprite2.src = "https://img.icons8.com/ios/50/000000/flower--v2.png" +
+  keySprite2.src = "https://img.icons8.com/plasticine/50/000000/flower.png" +
     "?" +
     new Date().getTime();
     keySprite2.setAttribute( "crossOrigin", " " );
@@ -738,10 +752,19 @@ function makeMaze() {
   var e = document.getElementById( "diffSelect" );
   difficulty = e.options[ e.selectedIndex ].value;
   cellSize = mazeCanvas.width / difficulty;
+  Player.onkey1=Boolean(false);
+  Player.onkey2=Boolean(false);
   maze = new Maze( difficulty, difficulty );
-  draw = new DrawMaze( maze, ctx, cellSize, finishSprite/*,keySprite1,keySprite2 */);
+  draw = new DrawMaze( maze, ctx, cellSize, finishSprite,keySprite1,keySprite2 );
   player = new Player( maze, mazeCanvas, cellSize, displayVictoryMess, sprite );
   if ( document.getElementById( "mazeContainer" ).style.opacity < "100" ) {
     document.getElementById( "mazeContainer" ).style.opacity = "100";
+  }
+}
+function key(){
+  if(Player.onkey1==true&&Player.onkey2==true){
+    
+  }else{
+
   }
 }
