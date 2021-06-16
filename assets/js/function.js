@@ -167,7 +167,7 @@ function Maze( Width, Height ) {
   }
 
   function defineStartEnd() {
-    switch ( rand( 4 ) ) {
+    switch ( rand( 3 ) ) {
       case 0:
         startCoord = {
           x: 0,
@@ -189,24 +189,24 @@ function Maze( Width, Height ) {
       case 1:
         startCoord = {
           x: 0,
-          y: width - 1
+          y: 0
         };
         endCoord = {
           x: height - 1,
           y: 0
         };
         keyCoord1={
-          x:width-1,
+          x:height-1,
           y:width-1
         };
         keyCoord2={
           x:0,
-          y:0
+          y:width - 1
         };
         break;
       case 2:
         startCoord = {
-          x: height - 1,
+          x: 0,
           y: 0
         };
         endCoord = {
@@ -214,7 +214,7 @@ function Maze( Width, Height ) {
           y: width - 1
         };
         keyCoord1={
-          x:0,
+          x:height -1,
           y:0
         };
         keyCoord2={
@@ -222,24 +222,24 @@ function Maze( Width, Height ) {
           y:width-1
         };
         break;
-      case 3:
-        startCoord = {
-          x: height - 1,
-          y: width - 1
-        };
-        endCoord = {
-          x: 0,
-          y: 0
-        };
-        keyCoord1={
-          x:height-1,
-          y:0
-        };
-        keyCoord2={
-          x:0,
-          y:width-1
-        };
-        break;
+      // case 3:
+      //   startCoord = {
+      //     x: height - 1,
+      //     y: width - 1
+      //   };
+      //   endCoord = {
+      //     x: 0,
+      //     y: 0
+      //   };
+      //   keyCoord1={
+      //     x:height-1,
+      //     y:0
+      //   };
+      //   keyCoord2={
+      //     x:0,
+      //     y:width-1
+      //   };
+      //   break;
     }
   }
 
@@ -702,7 +702,8 @@ window.onload = function () {
     isComplete();
   };
   keySprite1 = new Image();
-  keySprite1.src = "https://img.icons8.com/officel/50/000000/flower.png" +
+  // keySprite1.src = "https://img.icons8.com/officel/50/000000/flower.png" +
+  keySprite1.src = "https://img.icons8.com/fluent/48/000000/beehive.png" +
     "?" +
     new Date().getTime();
     keySprite1.setAttribute( "crossOrigin", " " );
@@ -713,7 +714,8 @@ window.onload = function () {
     isComplete();
   };
   keySprite2 = new Image();
-  keySprite2.src = "https://img.icons8.com/plasticine/50/000000/flower.png" +
+  // keySprite2.src = "https://img.icons8.com/plasticine/50/000000/flower.png" +
+  keySprite2.src = "https://img.icons8.com/fluent/48/000000/beehive.png" +
     "?" +
     new Date().getTime();
     keySprite2.setAttribute( "crossOrigin", " " );
@@ -761,7 +763,9 @@ function makeMaze() {
     document.getElementById( "mazeContainer" ).style.opacity = "100";
   }
 }
-function key(){
+function key(x,y){
+  var x1=x;
+  var y1=y;
   if(Player.onkey1==true&&Player.onkey2==true){
     
   }else{
